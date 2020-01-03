@@ -2,8 +2,8 @@ let currentOperation = []
 //Mathematical Operations
 function addition(values) {
     return values.length
-    ? values.reduce((sum, nextItem) => sum + nextItem)
-    : 0;
+        ? values.reduce((sum, nextItem) => sum + nextItem)
+        : 0;
 }
 
 function subtraction(values) {
@@ -14,15 +14,15 @@ function subtraction(values) {
 
 function multiplication(values) {
     return values.length
-		? values.reduce((product, nextItem) => product * nextItem)
-		: 0;
+        ? values.reduce((product, nextItem) => product * nextItem)
+        : 0;
 }
 
 
 function division(values) {
     return values.length
-		? values.reduce((quotient, nextItem) => quotient / nextItem)
-		: 0;
+        ? values.reduce((quotient, nextItem) => quotient / nextItem)
+        : 0;
 }
 
 //Operator - need to refactor to call all operations stored in the variable!
@@ -37,7 +37,9 @@ history.textContent = '';
 const calculatorButtons = document.querySelectorAll('.button');
 calculatorButtons.forEach((button) => {
     button.addEventListener('click', (e) => {
-        displayValue.textContent = displayValue.textContent + `${button.id}`
+        /\D$/.test(displayValue.textContent) ? 
+            displayValue.textContent = `${button.id}` :
+            displayValue.textContent = displayValue.textContent + `${button.id}`;
     })
 });
 
@@ -45,8 +47,13 @@ calculatorButtons.forEach((button) => {
 const operatorButtons = document.querySelectorAll('.operation');
 operatorButtons.forEach((button) => {
     button.addEventListener('click', (e) => {
-        history.textContent = history.textContent + displayValue.textContent + ` ${button.id} `;
-        displayValue.textContent = '';
+        if (/\d$/.test(displayValue.textContent)) {
+            history.textContent = history.textContent + displayValue.textContent + ` ${button.id} `;
+            displayValue.textContent = `${button.id}`;
+        } else {
+            history.textContent = history.textContent.slice(0, -3) + ` ${button.id} `;
+            displayValue.textContent = `${button.id}`;
+        }
     })
 });
 
@@ -59,21 +66,7 @@ equalsButton.addEventListener('click', (e) => {
     let arithmeticString = history.textContent
     currentOperation = arithmeticString.split(' ');
     while (currentOperation.length !== 1) {
-        currentOperation.forEach((item) => {
-            if (item === "*") {
-                let product = multiplication(findAdjacentValues(currentOperation, item));
-                replaceOperationAndAdjacentValues(currentOperation, "*", `${product}`);
-            } else if (item === "/" && (currentOperation.includes("*") !== true)) {
-                let quotient = division(findAdjacentValues(currentOperation, item));
-                replaceOperationAndAdjacentValues(currentOperation, "/", `${quotient}`);
-            } else if (item === "+" && (currentOperation.includes("*") !== true) && (currentOperation.includes("/") !== true)) {
-                let sum = addition(findAdjacentValues(currentOperation, item));
-                replaceOperationAndAdjacentValues(currentOperation, "+", `${sum}`);
-            } else if (item === "-" && (currentOperation.includes("*") !== true) && (currentOperation.includes("/") !== true)) {
-                let difference = subtraction(findAdjacentValues(currentOperation, item));
-                replaceOperationAndAdjacentValues(currentOperation, "-", `${difference}`);
-            }
-        });
+        arithemeticLogic(currentOperation);
     }
     resultDiv.textContent = currentOperation[0];
 });
@@ -89,3 +82,21 @@ function replaceOperationAndAdjacentValues(array, operation, result) {
     let left = array.indexOf(operation) - 1;
     array.splice(left, 3, result);
 };
+
+function arithemeticLogic(array) {
+    array.forEach((item) => {
+        if (item === "*") {
+            let product = multiplication(findAdjacentValues(array, item));
+            replaceOperationAndAdjacentValues(array, "*", `${product}`);
+        } else if (item === "/" && (array.includes("*") !== true)) {
+            let quotient = division(findAdjacentValues(array, item));
+            replaceOperationAndAdjacentValues(array, "/", `${quotient}`);
+        } else if (item === "+" && (array.includes("*") !== true) && (array.includes("/") !== true)) {
+            let sum = addition(findAdjacentValues(array, item));
+            replaceOperationAndAdjacentValues(array, "+", `${sum}`);
+        } else if (item === "-" && (array.includes("*") !== true) && (array.includes("/") !== true)) {
+            let difference = subtraction(findAdjacentValues(array, item));
+            replaceOperationAndAdjacentValues(array, "-", `${difference}`);
+        }
+    });
+}
