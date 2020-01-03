@@ -25,11 +25,6 @@ function division(values) {
         : 0;
 }
 
-//Operator - need to refactor to call all operations stored in the variable!
-function operate(operation, ...values) {
-    operation(...values)
-}
-
 //Display buttons
 const displayValue = document.querySelector('#display');
 const history = document.querySelector('#history');
@@ -42,6 +37,8 @@ calculatorButtons.forEach((button) => {
             displayValue.textContent = displayValue.textContent + `${button.id}`;
     })
 });
+
+//fix so that if first letter of string cannot be operator.
 
 //Operator Buttons
 const operatorButtons = document.querySelectorAll('.operation');
@@ -59,17 +56,23 @@ operatorButtons.forEach((button) => {
 
 const resultDiv = document.querySelector('#result');
 resultDiv.textContent = '';
+
+//Equals Button
 const equalsButton = document.querySelector('#equals');
 equalsButton.addEventListener('click', (e) => {
     history.textContent = history.textContent + displayValue.textContent;
     displayValue.textContent = '=';
     let arithmeticString = history.textContent
     currentOperation = arithmeticString.split(' ');
-    while (currentOperation.length !== 1) {
+        while (currentOperation.length !== 1) {
         arithemeticLogic(currentOperation);
     }
     resultDiv.textContent = currentOperation[0];
 });
+
+//Clear Button
+const clearButton = document.querySelector('#clear');
+clearButton.addEventListener('click', (e) => clearAll());
 
 function findAdjacentValues(array, value) {
     let left = array.indexOf(value) - 1;
@@ -83,12 +86,16 @@ function replaceOperationAndAdjacentValues(array, operation, result) {
     array.splice(left, 3, result);
 };
 
+//Operate function
 function arithemeticLogic(array) {
     array.forEach((item) => {
         if (item === "*") {
             let product = multiplication(findAdjacentValues(array, item));
             replaceOperationAndAdjacentValues(array, "*", `${product}`);
+            console.log(array)
         } else if (item === "/" && (array.includes("*") !== true)) {
+            let denominator = findAdjacentValues(array, item)[1];
+            notZero(denominator);
             let quotient = division(findAdjacentValues(array, item));
             replaceOperationAndAdjacentValues(array, "/", `${quotient}`);
         } else if (item === "+" && (array.includes("*") !== true) && (array.includes("/") !== true)) {
@@ -100,3 +107,19 @@ function arithemeticLogic(array) {
         }
     });
 }
+
+function notZero(n) {
+    n = +n;
+    if (!n) {
+        throw new Error("Invalid dividend " + n);
+    }
+    return n;
+}
+
+function clearAll() {
+    history.textContent = '';
+    displayValue.textContent = '';
+    resultDiv.textContent = '';
+    currentOperation = [];
+}
+
