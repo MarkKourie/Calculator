@@ -29,12 +29,12 @@ function division(values) {
 const displayValue = document.querySelector('#display');
 const history = document.querySelector('#history');
 history.textContent = '';
-const calculatorButtons = document.querySelectorAll('.button');
-calculatorButtons.forEach((button) => {
+const numberButtons = document.querySelectorAll('.button');
+numberButtons.forEach((button) => {
     button.addEventListener('click', (e) => {
         /(\d|\u002E)$/.test(displayValue.textContent) ? 
-            displayValue.textContent = displayValue.textContent + `${button.id}`:
-            displayValue.textContent = `${button.id}`;
+            displayValue.textContent = displayValue.textContent + `${button.value}`:
+            displayValue.textContent = `${button.value}`;
     })
 });
 
@@ -95,6 +95,16 @@ decimalButton.addEventListener('click', (e) => {
     }
 })
 
+//Plus/Minus Button
+const plusMinusButton = document.querySelector("#negative");
+plusMinusButton.addEventListener('click', (e) => {
+    if (/\d/.test(displayValue.textContent)) {
+        /^\u002D.*\d$/.test(displayValue.textContent) ?
+            displayValue.textContent = displayValue.textContent.slice(1):
+            displayValue.textContent = `-${displayValue.textContent}`;
+    }
+})
+
 
 //Operate function
 function arithemeticLogic(array) {
@@ -143,6 +153,3 @@ function replaceOperationAndAdjacentValues(array, operation, result) {
     let left = array.indexOf(operation) - 1;
     array.splice(left, 3, result);
 };
-
-//add plus/minus button that toggles button values to be positive or negative
-//add decimals
