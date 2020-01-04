@@ -32,9 +32,9 @@ history.textContent = '';
 const calculatorButtons = document.querySelectorAll('.button');
 calculatorButtons.forEach((button) => {
     button.addEventListener('click', (e) => {
-        /\D$/.test(displayValue.textContent) ? 
-            displayValue.textContent = `${button.id}` :
-            displayValue.textContent = displayValue.textContent + `${button.id}`;
+        /(\d|\u002E)$/.test(displayValue.textContent) ? 
+            displayValue.textContent = displayValue.textContent + `${button.id}`:
+            displayValue.textContent = `${button.id}`;
     })
 });
 
@@ -68,7 +68,7 @@ equalsButton.addEventListener('click', (e) => {
     let arithmeticString = history.textContent
     currentOperation = arithmeticString.split(' ');
     if (/\D$/.test(history.textContent)) {
-        clearAll()
+        clearAll() //add error div to display errors
         throw new Error("STOAHP");
     } else {
         while (currentOperation.length !== 1) {
@@ -82,6 +82,18 @@ equalsButton.addEventListener('click', (e) => {
 //Clear Button
 const clearButton = document.querySelector('#clear');
 clearButton.addEventListener('click', (e) => clearAll());
+
+//Decimal Button
+const decimalButton = document.querySelector("#decimal");
+decimalButton.addEventListener('click', (e) => {
+    if (displayValue.textContent == '') { 
+        displayValue.textContent = '0.' ;
+    } else if (/\u002E/.test(displayValue.textContent)) {
+        displayValue.textContent = displayValue.textContent;
+    } else {
+        displayValue.textContent = displayValue.textContent + '.';
+    }
+})
 
 
 //Operate function
