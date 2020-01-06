@@ -37,6 +37,13 @@ numberButtons.forEach((button) => {
             displayValue.textContent = `${button.value}`;
     })
 });
+numberButtons.forEach((button) => {
+    button.addEventListener('click', (e) => {
+        if (numbersDiv.className == "negative") {
+            revertToPositive();
+        }  
+    });
+});
 
 //Operator Buttons
 const operatorButtons = document.querySelectorAll('.operation');
@@ -78,8 +85,6 @@ equalsButton.addEventListener('click', (e) => {
             arithemeticLogic(currentOperation);
         }
     }
-    //make a new line between operations in pastOperations
-    //pastOperations.textContent = pastOperations.textContent + '\n' + history.textContent + ' = ' + currentOperation[0]
     createPastOperation();
     displayValue.textContent = currentOperation[0];
     history.textContent = '';
@@ -93,6 +98,11 @@ clearButton.addEventListener('click', (e) => clear());
 const clearAllButton = document.querySelector('#clear-all');
 clearAllButton.addEventListener('click', (e) => clearAll());
 
+//Backspace Button
+const backspaceButton = document.querySelector('#backspace');
+backspaceButton.addEventListener('click', (e) => {
+    displayValue.textContent = displayValue.textContent.slice(0, -1);
+})
 
 //Decimal Button
 const decimalButton = document.querySelector("#decimal");
@@ -122,12 +132,7 @@ plusMinusButton.addEventListener('click', (e) => {
         });
         numbersDiv.className = "negative"
     } else if (numbersDiv.className = "negative") {
-        numberButtons.forEach((button) => {
-            button.value = `${button.value}`.slice(1);
-            button.id = `${button.id}`.slice(1);
-            button.textContent = `${button.textContent}`.slice(1);
-        });
-        numbersDiv.className = "positive";
+        revertToPositive();
     }
 });
 
@@ -199,7 +204,15 @@ function clearPastOperations() {
         first.remove(); 
         first = e.firstElementChild; 
     } 
-} 
+}
+
+function revertToPositive() {
+    numberButtons.forEach((button) => {
+        button.value = `${button.value}`.slice(1);
+        button.id = `${button.id}`.slice(1);
+        button.textContent = `${button.textContent}`.slice(1);
+        });
+    numbersDiv.className = "positive";
+    }
 
 //add keyboard support
-//add backspace button
