@@ -42,23 +42,26 @@ numberButtons.forEach((button) => {
 const operatorButtons = document.querySelectorAll('.operation');
 operatorButtons.forEach((button) => {
     button.addEventListener('click', (e) => {
-        if (/\d$/.test(displayValue.textContent)) {
-            history.textContent = history.textContent + displayValue.textContent + ` ${button.id} `;
-            displayValue.textContent = `${button.id}`;
-        } else if (displayValue.textContent == '' && (button.id == '*' || button.id == '/')) {
-            displayValue.textContent = '';
-        } else if (displayValue.textContent == '' && (button.id == "+" || button.id == "-")) {
-            history.textContent = `0 ${button.id} `;
-            displayValue.textContent = `${button.id}`;
-        } else {
-            history.textContent = history.textContent.slice(0, -3) + ` ${button.id} `;
-            displayValue.textContent = `${button.id}`;
-        }
+            if (/\d$/.test(displayValue.textContent)) {
+                history.textContent = history.textContent + displayValue.textContent + ` ${button.id} `;
+                displayValue.textContent = `${button.id}`;
+            } else if (displayValue.textContent == '' && (button.id == '*' || button.id == '/')) {
+                displayValue.textContent = '';
+            } else if (displayValue.textContent == '' && (button.id == "+" || button.id == "-")) {
+                history.textContent = `0 ${button.id} `;
+                displayValue.textContent = `${button.id}`;
+            } else {
+                history.textContent = history.textContent.slice(0, -3) + ` ${button.id} `;
+                displayValue.textContent = `${button.id}`;
+            }
     })
 });
 
 const resultDiv = document.querySelector('#result');
 resultDiv.textContent = '';
+
+const pastOperations = document.querySelector('#past-operations');
+pastOperations.textContent = '';
 
 //Equals Button
 const equalsButton = document.querySelector('#equals');
@@ -69,19 +72,27 @@ equalsButton.addEventListener('click', (e) => {
     currentOperation = arithmeticString.split(' ');
     if (/\D$/.test(history.textContent)) {
         clearAll() //add error div to display errors
-        throw new Error("STOAHP");
+        throw new Error("STAHP");
     } else {
         while (currentOperation.length !== 1) {
             arithemeticLogic(currentOperation);
         }
     }
-    //modify currentOperation[0] to fixed decimal places or scientfic notation if too large for the screen
+    //make a new line between operations in pastOperations
+    //pastOperations.textContent = pastOperations.textContent + '\n' + history.textContent + ' = ' + currentOperation[0]
+    createPastOperation();
+    displayValue.textContent = currentOperation[0];
+    history.textContent = '';
     resultDiv.textContent = currentOperation[0];
 });
 
-//Clear Button
+//Clear Buttons
 const clearButton = document.querySelector('#clear');
-clearButton.addEventListener('click', (e) => clearAll());
+clearButton.addEventListener('click', (e) => clear());
+
+const clearAllButton = document.querySelector('#clear-all');
+clearAllButton.addEventListener('click', (e) => clearAll());
+
 
 //Decimal Button
 const decimalButton = document.querySelector("#decimal");
@@ -97,13 +108,28 @@ decimalButton.addEventListener('click', (e) => {
 
 //Plus/Minus Button
 const plusMinusButton = document.querySelector("#negative");
+const numbersDiv = document.querySelector("#numbers")
 plusMinusButton.addEventListener('click', (e) => {
     if (/\d/.test(displayValue.textContent)) {
         /^\u002D.*\d$/.test(displayValue.textContent) ?
             displayValue.textContent = displayValue.textContent.slice(1):
             displayValue.textContent = `-${displayValue.textContent}`;
+    } else if (numbersDiv.className == "positive") {
+        numberButtons.forEach((button) => {
+            button.value = `-${button.value}`;
+            button.id = `-${button.id}`;
+            button.textContent = `-${button.textContent}`
+        });
+        numbersDiv.className = "negative"
+    } else if (numbersDiv.className = "negative") {
+        numberButtons.forEach((button) => {
+            button.value = `${button.value}`.slice(1);
+            button.id = `${button.id}`.slice(1);
+            button.textContent = `${button.textContent}`.slice(1);
+        });
+        numbersDiv.className = "positive";
     }
-})
+});
 
 
 //Operate function
@@ -136,10 +162,15 @@ function notZero(n) {
 }
 
 function clearAll() {
+    clear();
+    clearPastOperations();
+    resultDiv.textContent = '';
+}
+
+function clear() {
     history.textContent = '';
     displayValue.textContent = '';
-    resultDiv.textContent = '';
-    currentOperation = [];
+    currentOperation = currentOperation[0];
 }
 
 function findAdjacentValues(array, value) {
@@ -153,3 +184,22 @@ function replaceOperationAndAdjacentValues(array, operation, result) {
     let left = array.indexOf(operation) - 1;
     array.splice(left, 3, result);
 };
+
+function createPastOperation() {
+    var para = document.createElement('P');
+    var text = document.createTextNode(`${history.textContent} = ${currentOperation[0]}`);
+    para.appendChild(text);
+    pastOperations.appendChild(para);
+}
+
+function clearPastOperations() { 
+    var e = document.querySelector("#past-operations"); 
+    var first = e.firstElementChild; 
+    while (first) { 
+        first.remove(); 
+        first = e.firstElementChild; 
+    } 
+} 
+
+//add keyboard support
+//add backspace button
