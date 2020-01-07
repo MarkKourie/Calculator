@@ -37,6 +37,8 @@ numberButtons.forEach((button) => {
             displayValue.textContent = `${button.value}`;
     })
 });
+
+//reverts values to positive if number displayed is already negative
 numberButtons.forEach((button) => {
     button.addEventListener('click', (e) => {
         if (numbersDiv.className == "negative") {
@@ -74,11 +76,11 @@ pastOperations.textContent = '';
 const equalsButton = document.querySelector('#equals');
 equalsButton.addEventListener('click', (e) => {
     history.textContent = history.textContent + displayValue.textContent;
-    displayValue.textContent = '=';
+    displayValue.textContent = '';
     let arithmeticString = history.textContent
     currentOperation = arithmeticString.split(' ');
     if (/\D$/.test(history.textContent)) {
-        clearAll() //add error div to display errors
+        clearAll() //change this to simply remove the last operator? Or display an error. 
         throw new Error("STAHP");
     } else {
         while (currentOperation.length !== 1) {
