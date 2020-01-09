@@ -42,7 +42,7 @@ window.addEventListener('keypress',(e) => {
     const button = document.querySelector(`.button[id="${String.fromCharCode(e.which)}"`);
     const operation = document.querySelector(`.operation[id="${String.fromCharCode(e.which)}"]`);
     const negativeButton = document.querySelector(`.button[id="-${String.fromCharCode(e.which)}"`);
-    
+    console.log(e.which)
     if (button) {
         updateDisplay(button)
     } else if (numbersDiv.className == "negative") {
@@ -61,9 +61,10 @@ window.addEventListener('keypress',(e) => {
 });
 
 window.addEventListener('keydown', (e) => {
+    console.log(e.which)
     if (e.which == 13) {
         operate();
-    } else if (e.which == 127) {
+    } else if (e.which == 46) {
         clear();
     } else if (e.which == 27) {
         clearAll();
@@ -153,6 +154,7 @@ function clearAll() {
     clear();
     clearPastOperations();
     resultDiv.textContent = '';
+    currentOperation = [];
 }
 
 function clear() {
@@ -199,6 +201,7 @@ function revertToPositive() {
 }
 
 function updateDisplay(button) {
+    usePreviousResult();
     /(\d|\u002E)$/.test(displayValue.textContent) ? 
         displayValue.textContent = displayValue.textContent + `${button.value}`:
         displayValue.textContent = `${button.value}`;
@@ -240,7 +243,7 @@ function operate() {
 }
 
 function backspace() {
-    displayValue.textContent = displayValue.textContent.slice(0, -1);
+        displayValue.textContent = displayValue.textContent.slice(0, -1);
 }
 
 function plusMinus() {
@@ -261,8 +264,11 @@ function plusMinus() {
 }
 
 function decimal() {
-    if (displayValue.textContent == '') { 
-        displayValue.textContent = '0.' ;
+    usePreviousResult();
+    const zero =  document.querySelector('.button[special-name="zero"]');
+    if (/\D$/.test(displayValue.textContent) || displayValue.textContent == '') {
+        displayValue.textContent = zero.textContent + '.' ;
+        numbersDiv.className == 'negative' ? revertToPositive() : undefined;
     } else if (/\u002E/.test(displayValue.textContent)) {
         displayValue.textContent = displayValue.textContent;
     } else {
@@ -270,6 +276,10 @@ function decimal() {
     }
 }
 
-//Still annoyed by: 
-// When inputting a new number after a previous operation, that number is added to the result as displayed
-// negative sign appears before clear, backspace, and 0. This is because of CSS rules. 
+function usePreviousResult() {
+    if (currentOperation[0] != undefined) {
+        displayValue.textContent='';
+        currentOperation = [];}
+}
+
+//fix error messages
