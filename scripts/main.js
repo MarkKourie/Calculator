@@ -1,4 +1,16 @@
+const displayValue = document.querySelector('#display');
+
+const history = document.querySelector('#history');
+history.textContent = '';
+
 let currentOperation = []
+
+const resultDiv = document.querySelector('#result');
+resultDiv.textContent = '';
+
+const pastOperations = document.querySelector('#past-operations');
+pastOperations.textContent = '';
+
 //Mathematical Operations
 function addition(values) {
     return values.length
@@ -25,17 +37,45 @@ function division(values) {
         : 0;
 }
 
+//Keyboard support
+window.addEventListener('keypress',(e) => {
+    const button = document.querySelector(`.button[id="${String.fromCharCode(e.which)}"`);
+    const operation = document.querySelector(`.operation[id="${String.fromCharCode(e.which)}"]`);
+    const negativeButton = document.querySelector(`.button[id="-${String.fromCharCode(e.which)}"`);
+    
+    if (button) {
+        updateDisplay(button)
+    } else if (numbersDiv.className == "negative") {
+        updateDisplay(negativeButton);
+        revertToPositive();
+    } else if (operation) {
+        event.preventDefault();
+        stroreOperation(operation);
+    } else if (e.which == 61) {
+        operate();
+    } else if (e.which == 95) {
+        plusMinus();
+    } else if (e.which == 46) {
+        decimal();
+    }
+});
+
+window.addEventListener('keydown', (e) => {
+    if (e.which == 13) {
+        operate();
+    } else if (e.which == 127) {
+        clear();
+    } else if (e.which == 27) {
+        clearAll();
+    } else if (e.which == 8) {
+        backspace();
+    }
+});
+
 //Display buttons
-const displayValue = document.querySelector('#display');
-const history = document.querySelector('#history');
-history.textContent = '';
 const numberButtons = document.querySelectorAll('.button');
 numberButtons.forEach((button) => {
-    button.addEventListener('click', (e) => {
-        /(\d|\u002E)$/.test(displayValue.textContent) ? 
-            displayValue.textContent = displayValue.textContent + `${button.value}`:
-            displayValue.textContent = `${button.value}`;
-    })
+    button.addEventListener('click', (e) => updateDisplay(button) );
 });
 
 //reverts values to positive if number displayed is already negative
@@ -50,48 +90,13 @@ numberButtons.forEach((button) => {
 //Operator Buttons
 const operatorButtons = document.querySelectorAll('.operation');
 operatorButtons.forEach((button) => {
-    button.addEventListener('click', (e) => {
-            if (/\d$/.test(displayValue.textContent)) {
-                history.textContent = history.textContent + displayValue.textContent + ` ${button.id} `;
-                displayValue.textContent = `${button.id}`;
-            } else if (displayValue.textContent == '' && (button.id == '*' || button.id == '/')) {
-                displayValue.textContent = '';
-            } else if (displayValue.textContent == '' && (button.id == "+" || button.id == "-")) {
-                history.textContent = `0 ${button.id} `;
-                displayValue.textContent = `${button.id}`;
-            } else {
-                history.textContent = history.textContent.slice(0, -3) + ` ${button.id} `;
-                displayValue.textContent = `${button.id}`;
-            }
-    })
+    button.addEventListener('click', (e) => stroreOperation(button) )
 });
 
-const resultDiv = document.querySelector('#result');
-resultDiv.textContent = '';
-
-const pastOperations = document.querySelector('#past-operations');
-pastOperations.textContent = '';
 
 //Equals Button
 const equalsButton = document.querySelector('#equals');
-equalsButton.addEventListener('click', (e) => {
-    history.textContent = history.textContent + displayValue.textContent;
-    displayValue.textContent = '';
-    let arithmeticString = history.textContent
-    currentOperation = arithmeticString.split(' ');
-    if (/\D$/.test(history.textContent)) {
-        clearAll() //change this to simply remove the last operator? Or display an error. 
-        throw new Error("STAHP");
-    } else {
-        while (currentOperation.length !== 1) {
-            arithemeticLogic(currentOperation);
-        }
-    }
-    createPastOperation();
-    displayValue.textContent = currentOperation[0];
-    history.textContent = '';
-    resultDiv.textContent = currentOperation[0];
-});
+equalsButton.addEventListener('click', (e) => operate());
 
 //Clear Buttons
 const clearButton = document.querySelector('#clear');
@@ -102,44 +107,19 @@ clearAllButton.addEventListener('click', (e) => clearAll());
 
 //Backspace Button
 const backspaceButton = document.querySelector('#backspace');
-backspaceButton.addEventListener('click', (e) => {
-    displayValue.textContent = displayValue.textContent.slice(0, -1);
-})
+backspaceButton.addEventListener('click', (e) => backspace())
 
 //Decimal Button
 const decimalButton = document.querySelector("#decimal");
-decimalButton.addEventListener('click', (e) => {
-    if (displayValue.textContent == '') { 
-        displayValue.textContent = '0.' ;
-    } else if (/\u002E/.test(displayValue.textContent)) {
-        displayValue.textContent = displayValue.textContent;
-    } else {
-        displayValue.textContent = displayValue.textContent + '.';
-    }
-})
+decimalButton.addEventListener('click', (e) => decimal())
 
 //Plus/Minus Button
 const plusMinusButton = document.querySelector("#negative");
 const numbersDiv = document.querySelector("#numbers")
-plusMinusButton.addEventListener('click', (e) => {
-    if (/\d/.test(displayValue.textContent)) {
-        /^\u002D.*\d$/.test(displayValue.textContent) ?
-            displayValue.textContent = displayValue.textContent.slice(1):
-            displayValue.textContent = `-${displayValue.textContent}`;
-    } else if (numbersDiv.className == "positive") {
-        numberButtons.forEach((button) => {
-            button.value = `-${button.value}`;
-            button.id = `-${button.id}`;
-            button.textContent = `-${button.textContent}`
-        });
-        numbersDiv.className = "negative"
-    } else if (numbersDiv.className = "negative") {
-        revertToPositive();
-    }
-});
+plusMinusButton.addEventListener('click', (e) => plusMinus());
 
 
-//Operate function
+//Core Arithmetic Logic
 function arithemeticLogic(array) {
     array.forEach((item) => {
         if (item === "/") {
@@ -160,12 +140,13 @@ function arithemeticLogic(array) {
     });
 }
 
-function notZero(n) {
-    n = +n;
-    if (!n) {
-        throw new Error("Invalid dividend " + n);
+function notZero(num) {
+    num = +num;
+    if (!num) {
+        clear();
+        throw new Error("Invalid dividend " + num);
     }
-    return n;
+    return num;
 }
 
 function clearAll() {
@@ -215,6 +196,80 @@ function revertToPositive() {
         button.textContent = `${button.textContent}`.slice(1);
         });
     numbersDiv.className = "positive";
-    }
+}
 
-//add keyboard support
+function updateDisplay(button) {
+    /(\d|\u002E)$/.test(displayValue.textContent) ? 
+        displayValue.textContent = displayValue.textContent + `${button.value}`:
+        displayValue.textContent = `${button.value}`;
+
+}
+
+function stroreOperation(button) {
+    if (/\d$/.test(displayValue.textContent)) {
+        history.textContent = history.textContent + displayValue.textContent + ` ${button.id} `;
+        displayValue.textContent = `${button.id}`;
+    } else if (displayValue.textContent == '' && (button.id == '*' || button.id == '/')) {
+        displayValue.textContent = '';
+    } else if (displayValue.textContent == '' && (button.id == "+" || button.id == "-")) {
+        history.textContent = `0 ${button.id} `;
+        displayValue.textContent = `${button.id}`;
+    } else {
+        history.textContent = history.textContent.slice(0, -3) + ` ${button.id} `;
+        displayValue.textContent = `${button.id}`;
+    }
+}
+
+function operate() {
+    history.textContent = history.textContent + displayValue.textContent;
+    displayValue.textContent = '';
+    let arithmeticString = history.textContent
+    currentOperation = arithmeticString.split(' ');
+    if (/\D$/.test(history.textContent)) {
+        clearAll() //change this to simply remove the last operator? Or display an error. 
+        throw new Error("That is not an operation");
+    } else {
+        while (currentOperation.length !== 1) {
+            arithemeticLogic(currentOperation);
+        }
+    }
+    createPastOperation();
+    displayValue.textContent = currentOperation[0];
+    history.textContent = '';
+    resultDiv.textContent = currentOperation[0];
+}
+
+function backspace() {
+    displayValue.textContent = displayValue.textContent.slice(0, -1);
+}
+
+function plusMinus() {
+    if (/\d/.test(displayValue.textContent)) {
+        /^\u002D.*\d$/.test(displayValue.textContent) ?
+            displayValue.textContent = displayValue.textContent.slice(1):
+            displayValue.textContent = `-${displayValue.textContent}`;
+    } else if (numbersDiv.className == "positive") {
+        numberButtons.forEach((button) => {
+            button.value = `-${button.value}`;
+            button.id = `-${button.id}`;
+            button.textContent = `-${button.textContent}`
+        });
+        numbersDiv.className = "negative"
+    } else if (numbersDiv.className = "negative") {
+        revertToPositive();
+    }
+}
+
+function decimal() {
+    if (displayValue.textContent == '') { 
+        displayValue.textContent = '0.' ;
+    } else if (/\u002E/.test(displayValue.textContent)) {
+        displayValue.textContent = displayValue.textContent;
+    } else {
+        displayValue.textContent = displayValue.textContent + '.';
+    }
+}
+
+//Still annoyed by: 
+// When inputting a new number after a previous operation, that number is added to the result as displayed
+// negative sign appears before clear, backspace, and 0. This is because of CSS rules. 
