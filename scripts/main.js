@@ -3,7 +3,7 @@ const displayValue = document.querySelector('#display');
 const history = document.querySelector('#history');
 history.textContent = '';
 
-let currentOperation = []
+let currentOperation = [];
 
 const resultDiv = document.querySelector('#result');
 resultDiv.textContent = '';
@@ -11,49 +11,23 @@ resultDiv.textContent = '';
 const pastOperations = document.querySelector('#past-operations');
 pastOperations.textContent = '';
 
-//Mathematical Operations
-function addition(values) {
-    return values.length
-        ? values.reduce((sum, nextItem) => sum + nextItem)
-        : 0;
-}
-
-function subtraction(values) {
-    return values.length
-        ? values.reduce((difference, nextItem) => difference - nextItem)
-        : 0;
-}
-
-function multiplication(values) {
-    return values.length
-        ? values.reduce((product, nextItem) => product * nextItem)
-        : 0;
-}
-
-
-function division(values) {
-    return values.length
-        ? values.reduce((quotient, nextItem) => quotient / nextItem)
-        : 0;
-}
-
 //Keyboard support
 window.addEventListener('keypress',(e) => {
     const button = document.querySelector(`.button[id="${String.fromCharCode(e.which)}"`);
     const operation = document.querySelector(`.operation[id="${String.fromCharCode(e.which)}"]`);
     const negativeButton = document.querySelector(`.button[id="-${String.fromCharCode(e.which)}"`);
-    console.log(e.which)
     if (button) {
-        updateDisplay(button)
+        updateDisplay(button);
     } else if (numbersDiv.className == "negative") {
         updateDisplay(negativeButton);
         revertToPositive();
     } else if (operation) {
-        event.preventDefault();
+        event.preventDefault(); // to stop '/' opening the quickfind shortcut in Firefox
         stroreOperation(operation);
     } else if (e.which == 61) {
         operate();
-    } else if (e.which == 95) {
+    } 
+    else if (e.which == 95) {
         plusMinus();
     } else if (e.which == 46) {
         decimal();
@@ -61,7 +35,6 @@ window.addEventListener('keypress',(e) => {
 });
 
 window.addEventListener('keydown', (e) => {
-    console.log(e.which)
     if (e.which == 13) {
         operate();
     } else if (e.which == 46) {
@@ -73,7 +46,7 @@ window.addEventListener('keydown', (e) => {
     }
 });
 
-//Display buttons
+//Number buttons
 const numberButtons = document.querySelectorAll('.button');
 numberButtons.forEach((button) => {
     button.addEventListener('click', (e) => updateDisplay(button) );
@@ -119,6 +92,32 @@ const plusMinusButton = document.querySelector("#negative");
 const numbersDiv = document.querySelector("#numbers")
 plusMinusButton.addEventListener('click', (e) => plusMinus());
 
+//FUNCTIONS
+//Mathematical Operations
+function addition(values) {
+    return values.length
+        ? values.reduce((sum, nextItem) => sum + nextItem)
+        : 0;
+}
+
+function subtraction(values) {
+    return values.length
+        ? values.reduce((difference, nextItem) => difference - nextItem)
+        : 0;
+}
+
+function multiplication(values) {
+    return values.length
+        ? values.reduce((product, nextItem) => product * nextItem)
+        : 0;
+}
+
+
+function division(values) {
+    return values.length
+        ? values.reduce((quotient, nextItem) => quotient / nextItem)
+        : 0;
+}
 
 //Core Arithmetic Logic
 function arithemeticLogic(array) {
@@ -150,19 +149,6 @@ function notZero(num) {
     return num;
 }
 
-function clearAll() {
-    clear();
-    clearPastOperations();
-    resultDiv.textContent = '';
-    currentOperation = [];
-}
-
-function clear() {
-    history.textContent = '';
-    displayValue.textContent = '';
-    currentOperation = currentOperation[0];
-}
-
 function findAdjacentValues(array, value) {
     let left = array.indexOf(value) - 1;
     let right = array.indexOf(value) + 1;
@@ -175,37 +161,13 @@ function replaceOperationAndAdjacentValues(array, operation, result) {
     array.splice(left, 3, result);
 };
 
-function createPastOperation() {
-    var para = document.createElement('P');
-    var text = document.createTextNode(`${history.textContent} = ${currentOperation[0]}`);
-    para.appendChild(text);
-    pastOperations.appendChild(para);
-}
-
-function clearPastOperations() { 
-    var e = document.querySelector("#past-operations"); 
-    var first = e.firstElementChild; 
-    while (first) { 
-        first.remove(); 
-        first = e.firstElementChild; 
-    } 
-}
-
-function revertToPositive() {
-    numberButtons.forEach((button) => {
-        button.value = `${button.value}`.slice(1);
-        button.id = `${button.id}`.slice(1);
-        button.textContent = `${button.textContent}`.slice(1);
-        });
-    numbersDiv.className = "positive";
-}
-
+//Input Functions
 function updateDisplay(button) {
     usePreviousResult();
     /(\d|\u002E)$/.test(displayValue.textContent) ? 
-        displayValue.textContent = displayValue.textContent + `${button.value}`:
-        displayValue.textContent = `${button.value}`;
-
+    displayValue.textContent = displayValue.textContent + `${button.value}`:
+    displayValue.textContent = `${button.value}`;
+    
 }
 
 function stroreOperation(button) {
@@ -242,15 +204,11 @@ function operate() {
     resultDiv.textContent = currentOperation[0];
 }
 
-function backspace() {
-        displayValue.textContent = displayValue.textContent.slice(0, -1);
-}
-
 function plusMinus() {
     if (/\d/.test(displayValue.textContent)) {
         /^\u002D.*\d$/.test(displayValue.textContent) ?
-            displayValue.textContent = displayValue.textContent.slice(1):
-            displayValue.textContent = `-${displayValue.textContent}`;
+        displayValue.textContent = displayValue.textContent.slice(1):
+        displayValue.textContent = `-${displayValue.textContent}`;
     } else if (numbersDiv.className == "positive") {
         numberButtons.forEach((button) => {
             button.value = `-${button.value}`;
@@ -276,10 +234,56 @@ function decimal() {
     }
 }
 
+//Editing Functions
+function clearAll() {
+    clear();
+    clearPastOperations();
+    resultDiv.textContent = '';
+    currentOperation = [];
+}
+
+function clear() {
+    history.textContent = '';
+    displayValue.textContent = '';
+    currentOperation = currentOperation[0];
+}
+
+function clearPastOperations() { 
+    var e = document.querySelector("#past-operations"); 
+    var first = e.firstElementChild; 
+    while (first) { 
+        first.remove(); 
+        first = e.firstElementChild; 
+    } 
+}
+
+function backspace() {
+    displayValue.textContent = displayValue.textContent.slice(0, -1);
+}
+
+function createPastOperation() {
+    var para = document.createElement('P');
+    var text = document.createTextNode(`${history.textContent} = ${currentOperation[0]}`);
+    para.appendChild(text);
+    pastOperations.appendChild(para);
+}
+
+//Auxilliary Functions
+function revertToPositive() {
+    numberButtons.forEach((button) => {
+        button.value = `${button.value}`.slice(1);
+        button.id = `${button.id}`.slice(1);
+        button.textContent = `${button.textContent}`.slice(1);
+    });
+    numbersDiv.className = "positive";
+}
+
 function usePreviousResult() {
     if (currentOperation[0] != undefined) {
         displayValue.textContent='';
         currentOperation = [];}
-}
-
-//fix error messages
+    }
+    
+    //fix error messages
+    //consider whether it's better to remove the result div, and instead add a result class to the display which transforms the text
+    //Remember to then remove the class as necessary if the result is modified in any way. 
